@@ -116,13 +116,6 @@ These fields map directly to the 10 KBYG sections and provide the data the skill
 - Highlights to reference (awards, press, wins)
 - Messaging boundaries (embargoed items, sensitive topics, and who to redirect those conversations to)
 
-### A5. Company Updates & Talking Points
-- Product updates (list)
-- Department updates (list)
-- Key talking points (3–5 themes)
-- Highlights to reference (awards, press, wins)
-- Messaging boundaries (embargoed items, sensitive topics, and who to redirect those conversations to)
-
 **Staff Social Media & Amplification**
 - Whether staff are expected to post (yes / encouraged / optional)
 - Key hashtags (event official + company)

@@ -23,7 +23,7 @@ This skill can pull event data from connected sources to pre-populate the KBYG i
 
 ### Ideal Architecture: Master Event Record
 
-The most efficient workflow is a **single structured event record** (in Airtable, Google Sheets, Notion, or similar) that serves as the consolidated operational record for every event. The KBYG skill reads from this record. Other tools — post-event reports, status updates, ROI analysis, staffing recommendations — also read from it. One record, many outputs.
+The most efficient workflow is a **single structured event record** (in Airtable, Google Sheets, Notion, or similar) that serves as the source of truth for every event. The KBYG skill reads from this record. Other tools — post-event reports, status updates, ROI analysis, staffing recommendations — also read from it. One source, many outputs.
 
 See `references/master-event-schema.md` for the full schema, including the event intelligence layer (historical participation, competitor analysis, post-event metrics) and staff event profiles.
 
@@ -55,58 +55,56 @@ Check connected data sources first (see above). Then ask the user for anything s
 **Required inputs (must have these to generate):**
 - Event name *
 - Event dates *
-- Event format * (in-person / virtual / hybrid) — determines which sections are relevant (e.g., A2 booth sections are skipped for virtual events)
-- Event type * (trade show / conference / webinar / workshop / executive dinner / customer event / sales presentation / other)
-- Event category * (hosted — you organized it, control the guest list | third-party — attending someone else's event)
-- Participation level * (booth | sponsorship | speaking | attending only | multiple — specify)
+- Event type * (sponsored booth | hosted/owned event | speaking engagement/panel | attending only | multiple — specify)
 - Event tier * (Tier 1 = major/flagship | Tier 2 = significant investment | Tier 3 = small/regional/low investment)
-
-Event type and category align with the Budget Defense skill's template system. When both skills read from the same master event record, the planner classifies the event once and both skills pick it up. Event type maps to a Budget Defense template (e.g., "executive dinner" → executive_dinner template). Event category determines whether the planner controls attendance (affects ROI lever analysis).
 
 **Optional inputs (prompt for these, accept what's available):**
 - Venue / city
 - Conference size (estimated total attendance)
 - Type of attendees (technical / executive / mixed / academic / industry-specific)
 - Area of knowledge or focus
-- Company goals and KPIs for this event
-- Booth (number, hall, layout overview and location, layout image or rendering)
-- Meeting spaces (room IDs, capacity, hours, booking process, AV)
-- War room or local office details
-- Design assets and booth materials (signage, banners, screens, printed materials, swag — with photos and placement notes)
+- Company goals for this event
+- Booth size and location
+- Booth layout image or rendering (photo, floor plan, or design mockup showing the setup)
+- Meeting room availability and booking process
+- Design assets and booth materials (signage, banners, screens, printed materials, swag)
+- Photos of design assets (images of banners, signage, swag — with placement notes for where each goes in the booth)
 - Venue or floor map images
 - Hotel and travel details
 - HR travel policy details (per diem, credit card policy, insurance, expense reporting)
-- Event calendar (hosted events, sponsored events, program sessions, partner/industry/C-suite highlighted sessions)
-- Product updates or key messaging
+- Hosted events (company dinners, receptions, demos, etc.)
+- Sponsored events
+- Sessions where company is part of the program
+- Highlighted partner events at the conference worth attending
+- Highlighted industry-relevant sessions
+- Highlighted C-suite / executive-attended events
+- Product updates or key messaging to share
 - Department updates or highlights
-- Staff social amplification guidance (hashtags, what to amplify, approval process)
-- Lead capture tool, office hours, and training details
-- Lead qualification criteria (MQL/SQL definitions with examples, scoring) — these carry through to the Budget Defense skill
-- Event tech stack (event app, meeting scheduling tool, WiFi, Slack channel)
-- Salesforce campaign hierarchy and member status
-- Staff roster (names, roles, expertise, shifts)
-- Speaker support details (deck status, rehearsal schedule, handler)
+- Lead capture tool and process
+- Lead qualification criteria (MQL vs SQL definitions, scoring guidance)
+- Event tech stack (badge scanning app, event app, scheduling tool)
+- Staff attending (names, roles, expertise areas, professional contact info)
 - Post-event reporting expectations and deadlines
 - Key contacts (event planner, staff leads, emergency)
 - Any special instructions or notes
 
 ## Step 2: Determine Sections
 
-A KBYG has 10 sections. Every section is always generated, but the **depth and detail** varies by tier. The planner can override any recommendation — if they say "include full observation guide for this Tier 3 event," do it.
+A KBYG has 10 sections. Every section is always generated, but the **depth and detail** varies by tier. The planner can override any recommendation — if they say "include full eyes & ears for this Tier 3 event," do it.
 
 Read the section templates in `references/sections.md` for the full structure of each section.
 
 | Section | Tier 1 (Flagship) | Tier 2 (Significant) | Tier 3 (Small/Regional) |
 |---|---|---|---|
-| 1. Event Overview | Full context + format + strategic goals + event goals with KPIs + audience profile | Standard context + format + event goals + KPIs | Brief — name, format, dates, goals, why we're there |
-| 2. Our Presence & Design Assets | Full — Booth (number, layout, AV, demos, hours, rules, shifts) + Meeting Spaces (rooms, booking, AV) + War Room/Local Office + all design assets | Standard — Booth + Meeting Spaces + key materials | Light — where to find us + key materials |
+| 1. Event Overview | Full context + strategic goals + audience profile | Standard context + goals | Brief — name, dates, why we're there |
+| 2. Our Presence & Design Assets | Full — booth, rooms, activations, meeting booking, all design assets and materials | Standard — booth/table, meeting info, key materials | Light — what we have, where to find us |
 | 3. Travel & Logistics | Full — flights, hotel, HR travel policy, per diem, insurance, expense reporting | Standard — hotel, travel basics, expense reporting | Light — travel basics, expense reporting |
 | 4. Event Calendar | Full — all hosted, sponsored, program, and highlighted events (partner, industry, C-suite) with registration and run of show | Standard — hosted + program + key highlighted events | Light — key sessions to attend |
-| 5. Company Updates & Talking Points | Full — product updates, department updates, key messaging, highlights, messaging boundaries, staff social amplification guidance | Standard — key product updates, talking points, messaging boundaries, social basics | Light — one-paragraph update + boundaries |
-| 6. Event Tech & Lead Qualification | Full — event app, lead capture tool, office hours, training, WiFi/access, plus MQL/SQL definitions, scoring, Salesforce campaign info, lead routing | Standard — lead capture + training + event app + MQL/SQL + scoring | Light — lead capture tool + office hours + basic qualification |
-| 7. What to Watch For | Full — photo guidance, observation priorities, market observations, what to listen for, reporting | Standard — photo guidance, key things to look for | Brief reminder — capture photos, note highlights |
+| 5. Company Updates & Talking Points | Full — product updates, department updates, key messaging, highlights | Standard — key product updates and talking points | Light — one-paragraph update |
+| 6. Event Tech & Lead Qualification | Full — lead capture tools, MQL/SQL training, qualification techniques, event app, all tools | Standard — lead capture + basic qualification + event app | Light — lead capture method only |
+| 7. Eyes & Ears Guide | Full — photo guidance, session assessment, competitor analysis, questions to ask, reporting | Standard — photo guidance, key things to look for | Brief reminder — capture photos, note highlights |
 | 8. Post-Event Reporting | Full — expectations, deadlines, format, metrics, debrief meeting, lead follow-up | Standard — expectations and deadline | Light — brief reminder |
-| 9. Staff & Speaker Support | Full — roster, expertise, shifts, who to pull in for what + speaker prep (deck status, rehearsal, handler) + headshot service (Tier 1 only — voluntary) | Standard — roster with name, role, contact + speaker assignments | Light — who's attending + planner contact |
+| 9. Staff Attending | Full — roster with name, role, expertise, contact, shifts, who to pull in for what | Standard — roster with name, role, contact | Light — who's attending + planner contact |
 | 10. Key Contacts | Full — planners, staff leads, task owners, vendors, emergency | Standard — planner + key leads + emergency | Planner + emergency contact |
 
 ## Step 3: Generate the Document
@@ -118,15 +116,6 @@ Ask the user: **"Would you like this as a Word document (.docx), Markdown (.md),
 - For `.docx`: Read `/mnt/skills/public/docx/SKILL.md` and follow those instructions for document creation.
 - For `.md`: Generate a clean markdown file with clear heading hierarchy.
 - For `.pptx`: Read `/mnt/skills/public/pptx/SKILL.md` and follow those instructions. Structure as one section per slide. Keep slides minimal — title, key bullets, and any relevant images only. This format is useful for teams that present the KBYG in an all-hands or pre-event team meeting.
-
-### Virtual and hybrid event adaptation
-
-When event format is **virtual** or **hybrid**, adapt these sections:
-
-- **Section 2 (Our Presence):** Replace Booth with "Virtual Setup" (platform, login credentials, virtual background, audio/video check guidance). Skip Meeting Spaces and War Room unless the company has a physical hub location for a hybrid event.
-- **Section 3 (Travel):** Skip for fully virtual. For hybrid, include travel details only for staff attending in person.
-- **Section 7 (What to Watch For):** Adapt to virtual context — what to watch in the chat, which sessions to attend live vs. watch recording, how to share observations asynchronously.
-- **Shipping (B3):** Not applicable for fully virtual events.
 
 ### Formatting guidance
 
