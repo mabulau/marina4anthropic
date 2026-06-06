@@ -375,7 +375,7 @@ This section adds contacts that are NOT in the Staff Attending section — prima
 
 ## Formatting & Style Notes
 
-- **Keep it short.** A Tier 1 KBYG should be 4–6 pages max. Tier 3 should fit on 1–2 pages.
+- **Keep it scannable, not short.** Length follows the event — a flagship Tier 1 with full calendars, a design-asset inventory, and a large roster will run long, and that's correct. "Light" means every line earns its place: bullets over paragraphs, tables over prose, no filler. A Tier 3 is brief because the *event* is small, not because detail was cut.
 - **Use bullet points aggressively.** No one reads paragraphs in a KBYG.
 - **Bold key info:** dates, deadlines, locations, names.
 - **Link everything.** Registration links, hotel booking, shared folders, event app downloads — make them clickable.

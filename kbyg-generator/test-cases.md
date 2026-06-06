@@ -53,7 +53,7 @@ Three validation scenarios covering the full tier range. Use these to verify the
 ### Expected Output Characteristics
 
 - All 10 sections present at full depth, numbered 1–10 starting with Event Overview
-- 4–6 pages
+- Expect a long, detailed document — all ten sections at full depth. Completeness matters more than page count.
 - Floor map and booth rendering embedded in Section 2 with captions
 - Design assets listed with placement and quantities
 - Highlighted events section with partner, industry, and C-suite sub-groups
@@ -100,7 +100,7 @@ Three validation scenarios covering the full tier range. Use these to verify the
 ### Expected Output Characteristics
 
 - All 10 sections present but at Tier 2 depth
-- 2–3 pages
+- Noticeably leaner than Tier 1 — same sections, less depth per section
 - Design assets section brief — just key materials listed
 - No hosted or sponsored events in calendar — section still present with program session and highlighted industry events only
 - Brief MQL vs SQL definitions with a few questions
@@ -138,7 +138,7 @@ Three validation scenarios covering the full tier range. Use these to verify the
 ### Expected Output Characteristics
 
 - All 10 sections present but at minimal Tier 3 depth
-- 1–2 pages maximum
+- Short — 1–2 pages — because the event is small, not because detail was cut
 - No booth details — "Our Presence" section notes we don't have a booth and lists materials we're bringing
 - No hosted/sponsored/program calendar — section notes key sessions TBD with placeholder: "[PLANNER: Add key sessions once agenda is published]"
 - No MQL/SQL training — just a reminder to capture name, company, interest, and follow-up priority
@@ -162,7 +162,7 @@ After running each test case, verify:
 - [ ] Lead qualification training scales correctly (full in T1, brief in T2, one-liner in T3)
 - [ ] Staff section scales correctly (full roster in T1, simple table in T2, name list in T3)
 - [ ] For Tier 3: Staff Attending and Key Contacts combined if team is very small
-- [ ] Document length matches tier target (T1: 4–6 pages, T2: 2–3 pages, T3: 1–2 pages)
+- [ ] Document length scales by tier (T1 most detailed → T3 minimal), driven by event scope, not a fixed page target
 - [ ] No generated prose — all content assembled from source data
 - [ ] All links and deadlines are bolded
 - [ ] Document has title, event dates, version date, and "Questions?" line
