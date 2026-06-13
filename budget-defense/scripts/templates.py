@@ -289,13 +289,17 @@ def get_tone_multipliers(tone: str, calibration: dict = None) -> dict:
             r = ranges.get(rate_key, {})
             avg = averages.get(rate_key)
 
-            if r and avg and avg > 0:
+            # Support both "low"/"high" and "min"/"max" schemas
+            range_low = r.get("low", r.get("min"))
+            range_high = r.get("high", r.get("max"))
+
+            if avg and avg > 0 and range_low is not None and range_high is not None:
                 if tone == "conservative":
                     # Conservative = ratio of historical low to average
-                    multipliers[rate_key] = r.get("low", avg) / avg
+                    multipliers[rate_key] = range_low / avg
                 elif tone == "optimistic":
                     # Optimistic = ratio of historical high to average
-                    multipliers[rate_key] = r.get("high", avg) / avg
+                    multipliers[rate_key] = range_high / avg
                 else:
                     multipliers[rate_key] = 1.0
             else:
