@@ -5,17 +5,6 @@ sys.path.insert(0, os.path.dirname(__file__))
 from templates import BENCHMARKS
 
 def compute_calibration_stats(values: list) -> dict:
-    """
-    Compute robust calibration statistics that adapt to sample size.
-
-    5-9 events:  median for central tendency, min/max for variance range
-    10+ events:  trimmed mean (10%) for central tendency, P25/P75 for variance range
-
-    Always computes simple mean alongside robust average and flags divergence >15%.
-
-    values: list of floats (one metric across N events)
-    Returns dict with robust_average, simple_mean, variance range, divergence flag.
-    """
     if not values or len(values) < 1:
         return {"fires": False, "reason": "No data"}
 
@@ -24,7 +13,6 @@ def compute_calibration_stats(values: list) -> dict:
     simple_mean = sum(values) / n
 
     if n < 5:
-        # Pre-calibration — not enough data for robust stats
         return {
             "fires": True,
             "method": "simple_mean",
@@ -42,7 +30,6 @@ def compute_calibration_stats(values: list) -> dict:
         }
 
     if n <= 9:
-        # 5-9 events: use median, min/max variance
         if n % 2 == 0:
             median = (sorted_vals[n // 2 - 1] + sorted_vals[n // 2]) / 2
         else:
@@ -56,21 +43,18 @@ def compute_calibration_stats(values: list) -> dict:
         var_method = "min_max"
 
     else:
-        # 10+ events: trimmed mean (10%), P25/P75 variance
         trim_count = max(1, round(n * 0.10))
         trimmed = sorted_vals[trim_count:-trim_count] if trim_count < n // 2 else sorted_vals
         robust_avg = sum(trimmed) / len(trimmed)
         method = "trimmed_mean"
         method_label = f"trimmed mean, {n} events (dropped {trim_count} outliers each end)"
 
-        # P25 and P75 (using nearest-rank method)
         p25_idx = max(0, round(n * 0.25) - 1)
         p75_idx = min(n - 1, round(n * 0.75) - 1)
         var_low = sorted_vals[p25_idx]
         var_high = sorted_vals[p75_idx]
         var_method = "iqr_p25_p75"
 
-    # Divergence check: does simple mean differ from robust average by >15%?
     if robust_avg != 0:
         divergence_pct = abs(simple_mean - robust_avg) / abs(robust_avg) * 100
     else:
@@ -100,13 +84,6 @@ def compute_calibration_stats(values: list) -> dict:
 
 
 def compute_full_calibration(events: list, category: str) -> dict:
-    """
-    Compute full calibration state for a category from a list of event dicts.
-    Returns the calibration.json structure for this category.
-
-    events: list of event dicts from events.json (filtered to this category)
-    category: the template key / category name
-    """
     rate_keys = ["boothVisitorRate", "leadsRate", "mqlRate", "sqlRate", "winRate"]
     metric_keys = ["roi", "coverage", "cpl", "costPerSql"]
 
@@ -129,7 +106,6 @@ def compute_full_calibration(events: list, category: str) -> dict:
     variance_ranges = {}
     divergence_flags = {}
 
-    # Process rates (from inputs)
     for key in rate_keys:
         values = [e.get("inputs", {}).get(key) for e in events]
         values = [v for v in values if v is not None]
@@ -141,7 +117,6 @@ def compute_full_calibration(events: list, category: str) -> dict:
             if stats["divergenceFlag"]:
                 divergence_flags[key] = stats["divergence"]
 
-    # Process derived metrics (from outputs)
     for key in metric_keys:
         values = [e.get("outputs", {}).get(key) for e in events]
         values = [v for v in values if v is not None]
@@ -153,7 +128,6 @@ def compute_full_calibration(events: list, category: str) -> dict:
             if stats["divergenceFlag"]:
                 divergence_flags[key] = stats["divergence"]
 
-    # Determine calibration status
     if n >= 5:
         cal_status = "calibrated"
         status_label = f"calibrated, {n} events"
@@ -161,7 +135,6 @@ def compute_full_calibration(events: list, category: str) -> dict:
         cal_status = "learning"
         status_label = f"learning {n}/5"
 
-    # Adaptive thresholds based on event size
     avg_attendees = 0
     att_values = [e.get("inputs", {}).get("attendees", 0) for e in events]
     if att_values:
@@ -194,10 +167,5 @@ def compute_full_calibration(events: list, category: str) -> dict:
             }
         },
         "method": "median" if n <= 9 else "trimmed_mean",
-        "lastRecalibration": None  # caller sets this to current timestamp
+        "lastRecalibration": None
     }
-
-
-# ──────────────────────────────────────────────────────────────
-# Evolution Chart Data
-# ──────────────────────────────────────────────────────────────

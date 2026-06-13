@@ -1,9 +1,5 @@
 """Budget Defense — Templates, Benchmarks, and Tone Configuration"""
 
-# ──────────────────────────────────────────────────────────────
-# Industry Benchmark Ranges (defaults — templates can override)
-# ──────────────────────────────────────────────────────────────
-
 BENCHMARKS = {
     "boothVisitorRate": {"low": 0.05, "high": 0.20, "direction": "within-range"},
     "leadsRate":        {"low": 0.35, "high": 0.60, "direction": "higher-is-better"},
@@ -16,13 +12,8 @@ BENCHMARKS = {
     "roi":              {"low": 3.0,  "high": 5.0,  "direction": "higher-is-better"},
 }
 
-MARKETING_INVESTMENT_PCT = 0.10  # industry rule of thumb: 10% of revenue goes to marketing
+MARKETING_INVESTMENT_PCT = 0.10
 
-# ──────────────────────────────────────────────────────────────
-# Event Type Templates
-# ──────────────────────────────────────────────────────────────
-
-# Default funnel labels (used when template doesn't override)
 DEFAULT_FUNNEL_LABELS = {
     "attendees": "Attendees",
     "visitors": "Booth Visitors",
@@ -174,12 +165,7 @@ TEMPLATES = {
 
 
 def get_template(template_key: str, custom_templates: dict = None) -> dict:
-    """
-    Get a template by key. Checks custom templates first (from settings/templates.json),
-    then falls back to built-in defaults. This allows planners to add or override templates.
-    """
     if custom_templates and template_key in custom_templates:
-        # Merge custom over defaults so partial overrides work
         base = TEMPLATES.get(template_key, {}).copy()
         base.update(custom_templates[template_key])
         return base
@@ -188,27 +174,16 @@ def get_template(template_key: str, custom_templates: dict = None) -> dict:
 
 def match_template(event_type: str = "", event_format: str = "", event_category: str = "",
                    custom_templates: dict = None) -> str:
-    """
-    Match an event to the best template using type, format, and category fields.
-    Category refines the match: a 'Conference' with 'Customer engagement' category
-    maps to customer_event, not conference_presentation.
-    Custom templates are checked first for keyword matches (planner's templates take priority).
-
-    Returns the template key.
-    """
     event_type_lower = (event_type or "").lower()
     event_format_lower = (event_format or "").lower()
     event_category_lower = (event_category or "").lower()
 
-    # Category-first overrides: these take priority regardless of type
     if "customer" in event_category_lower:
         return "customer_event"
 
-    # Format-specific overrides
     if event_format_lower in ("dinner", "roundtable"):
         return "executive_dinner"
 
-    # Check custom templates FIRST for keyword matches (planner's templates take priority)
     if custom_templates:
         for key, tmpl in custom_templates.items():
             keywords = tmpl.get("categoryKeywords", [])
@@ -216,31 +191,22 @@ def match_template(event_type: str = "", event_format: str = "", event_category:
                 if kw in event_type_lower or kw in event_format_lower:
                     return key
 
-    # Then check built-in templates
     for key, tmpl in TEMPLATES.items():
         keywords = tmpl.get("categoryKeywords", [])
         for kw in keywords:
             if kw in event_type_lower or kw in event_format_lower:
                 return key
 
-    # Default
     return "booth_presence"
 
-# ──────────────────────────────────────────────────────────────
-# Scenario Tone Bands (per-stage variance)
-# ──────────────────────────────────────────────────────────────
-# Upstream rates vary more than downstream rates. Booth visitor rate
-# swings with booth location and floor traffic; win rate is structural.
-# These fixed bands are used pre-calibration. Post-calibration (5+ events),
-# the planner's own variance range replaces these.
 
 TONE_BANDS = {
     "conservative": {
-        "boothVisitorRate": 0.65,   # -35% — high variance (booth location, traffic)
-        "leadsRate":        0.78,   # -22% — medium-high (staff quality, qualification)
-        "mqlRate":          0.82,   # -18% — medium (follow-up speed, ICP fit)
-        "sqlRate":          0.88,   # -12% — medium-low (sales capacity)
-        "winRate":          0.90,   # -10% — low (structural: product, pricing)
+        "boothVisitorRate": 0.65,
+        "leadsRate":        0.78,
+        "mqlRate":          0.82,
+        "sqlRate":          0.88,
+        "winRate":          0.90,
     },
     "realistic": {
         "boothVisitorRate": 1.0,
@@ -250,15 +216,14 @@ TONE_BANDS = {
         "winRate":          1.0,
     },
     "optimistic": {
-        "boothVisitorRate": 1.35,   # +35%
-        "leadsRate":        1.22,   # +22%
-        "mqlRate":          1.18,   # +18%
-        "sqlRate":          1.12,   # +12%
-        "winRate":          1.10,   # +10%
+        "boothVisitorRate": 1.35,
+        "leadsRate":        1.22,
+        "mqlRate":          1.18,
+        "sqlRate":          1.12,
+        "winRate":          1.10,
     }
 }
 
-# Legacy flat multipliers (kept for backward compatibility)
 TONES = {
     "conservative": 0.75,
     "realistic": 1.0,
@@ -273,13 +238,14 @@ def get_tone_multipliers(tone: str, calibration: dict = None) -> dict:
     - Post-calibration: uses the planner's own observed variance range
 
     calibration: dict from calibration.json for this event category, or None.
-        Expected shape: {"varianceRanges": {"boothVisitorRate": {"min": 0.08, "max": 0.22}, ...},
+        Expected shape: {"varianceRanges": {"boothVisitorRate": {"low": 0.08, "high": 0.22}, ...},
                          "runningAverages": {"boothVisitorRate": 0.14, ...}}
+        Canonical keys are "low"/"high" (what compute_calibration_stats emits).
+        "min"/"max" are accepted as legacy aliases for backward compatibility.
     """
     if tone == "realistic":
         return {k: 1.0 for k in ["boothVisitorRate", "leadsRate", "mqlRate", "sqlRate", "winRate"]}
 
-    # Post-calibration: use planner's own variance
     if calibration and calibration.get("varianceRanges"):
         ranges = calibration["varianceRanges"]
         averages = calibration.get("runningAverages", {})
@@ -289,20 +255,22 @@ def get_tone_multipliers(tone: str, calibration: dict = None) -> dict:
             r = ranges.get(rate_key, {})
             avg = averages.get(rate_key)
 
-            if r and avg and avg > 0:
+            # Canonical keys: low/high. Accept min/max as legacy aliases so a
+            # calibration.json written in either format produces real multipliers
+            # instead of silently falling back to 1.0.
+            range_low = r.get("low", r.get("min"))
+            range_high = r.get("high", r.get("max"))
+
+            if avg and avg > 0 and range_low is not None and range_high is not None:
                 if tone == "conservative":
-                    # Conservative = ratio of historical low to average
-                    multipliers[rate_key] = r.get("low", avg) / avg
+                    multipliers[rate_key] = range_low / avg
                 elif tone == "optimistic":
-                    # Optimistic = ratio of historical high to average
-                    multipliers[rate_key] = r.get("high", avg) / avg
+                    multipliers[rate_key] = range_high / avg
                 else:
                     multipliers[rate_key] = 1.0
             else:
-                # Fall back to fixed bands for rates without calibration data
                 multipliers[rate_key] = TONE_BANDS.get(tone, TONE_BANDS["realistic"]).get(rate_key, 1.0)
 
         return multipliers
 
-    # Pre-calibration: use fixed bands
     return TONE_BANDS.get(tone, TONE_BANDS["realistic"]).copy()
