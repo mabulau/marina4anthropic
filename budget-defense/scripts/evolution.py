@@ -34,34 +34,6 @@ def compare_scenarios(scenario_a: dict, scenario_b: dict) -> dict:
     return deltas
 
 
-def _calc_delta(val_a, val_b, precision=2):
-    """
-    Calculate delta between two values, handling zero-crossing safely.
-    Returns absolute delta + direction instead of misleading percentages
-    when the baseline is zero or negative, or when values cross zero.
-    """
-    delta = round(val_b - val_a, precision)
-    result = {
-        "a": val_a,
-        "b": val_b,
-        "delta": delta,
-        "direction": "up" if delta > 0 else ("down" if delta < 0 else "flat")
-    }
-
-    # Only show percentage change when it's meaningful:
-    # - baseline is not zero
-    # - values don't cross zero (sign change makes % misleading)
-    crosses_zero = (val_a < 0 and val_b > 0) or (val_a > 0 and val_b < 0)
-    if val_a != 0 and not crosses_zero:
-        result["pctChange"] = round((val_b - val_a) / abs(val_a) * 100, 1)
-    else:
-        result["pctChange"] = None
-        if crosses_zero:
-            result["note"] = "crosses zero — percentage not meaningful"
-
-    return result
-
-
 # ──────────────────────────────────────────────────────────────
 # Helpers
 
@@ -74,7 +46,7 @@ def event_evolution(events: list, metric: str = "roi", category: str = None,
 
     events: list of event dicts from events.json (each has identity, inputs, outputs)
     metric: which metric to chart (roi, coverage, cpl, costPerSql, boothVisitorRate, etc.)
-    category: filter by template/event type
+    category: filter by event category
     year: filter by year
     template_key: filter by specific template
     """
@@ -82,7 +54,7 @@ def event_evolution(events: list, metric: str = "roi", category: str = None,
 
     if category:
         filtered = [e for e in filtered
-                    if e.get("identity", {}).get("eventType", "") == category]
+                    if e.get("identity", {}).get("category", "") == category]
     if template_key:
         filtered = [e for e in filtered
                     if e.get("identity", {}).get("eventType", "") == template_key]
@@ -304,5 +276,3 @@ def roll_up_child_events(children: list) -> dict:
         },
         "children": child_summaries
     }
-
-
